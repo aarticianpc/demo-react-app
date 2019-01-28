@@ -14,6 +14,7 @@ import PrivateRoute from './common/PrivateRoute';
 import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
 import Dashboard from './components/dashboard/Dashboard';
+import User from './components/user/User';
 
 import './App.css';
 
@@ -43,6 +44,7 @@ class App extends Component {
             <Navbar />
             <Route exact path="/" component={Landing} />
             <div className="container">
+              <Route exact path="/users" component={User} />
               <Route exact path="/register" component={Register} />
               <Route exact path="/login" component={Login} />
               <Switch>
