@@ -6,6 +6,8 @@ const path = require('path');
 
 // Getting authentication routes
 const auth = require('./routes/api/auth');
+// Getting user routes
+const users = require('./routes/api/users');
 
 const app = express();
 
@@ -29,6 +31,7 @@ app.use(passport.initialize());
 require('./config/passport')(passport);
 
 app.use('/api/auth', auth);
+app.use('/api/user', users);
 
 if(process.env.NODE_ENV === 'production') {
   // Set static folder
