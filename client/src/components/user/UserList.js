@@ -5,7 +5,18 @@ import UserItem from './UserItem';
 class UserList extends Component {
   render() {
     const { users } = this.props;
-    return users.map(user => <UserItem key={user.id} user={user} />);
+    if(users){
+        const userItem = (
+            <div className="profiles">
+                { users.map((user) => 
+                    <UserItem key={user._id} user={user} />   
+                )}
+            </div>
+        );
+        return userItem;
+    } else {
+        return null;
+    }
   }
 }
 

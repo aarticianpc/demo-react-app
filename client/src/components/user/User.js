@@ -14,7 +14,6 @@ class User extends Component {
 
     const { users } = this.props.user;
     let userContent;
-
     userContent = <UserList users={users} />;
     
     return ( 
