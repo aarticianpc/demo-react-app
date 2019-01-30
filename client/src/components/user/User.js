@@ -7,7 +7,9 @@ import UserList from './UserList';
 class User extends Component {
 
   componentDidMount() {
+    if(!this.props.userSearch){
       this.props.getUsers();
+    }
   }
 
   render() {
@@ -31,12 +33,13 @@ class User extends Component {
 }
 
 User.propTypes = {
-    getUsers: PropTypes.func.isRequired,
-    user: PropTypes.object.isRequired 
+	getUsers: PropTypes.func.isRequired,
+	user: PropTypes.object.isRequired 
 }
 
 const mapStateToProps = state => ({
-    user: state.user
+	user: state.user,
+	userSearch: state.user.userSearch
 })
 
 export default connect(mapStateToProps, { getUsers })(User);
