@@ -2,7 +2,13 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Select from 'react-select';
-import { searchUserByName, findUsersById, getUsers, findUsersByDateRange } from '../../../actions/userActions';
+import { 
+    searchUserByName, 
+    getUsers, 
+    updateDateRanges, 
+    userFilterToggle, 
+    updateUserIds 
+} from '../../../actions/userActions';
 import DateRangePicker from 'react-bootstrap-daterangepicker';
 import 'bootstrap-daterangepicker/daterangepicker.css';
 import moment from 'moment';
@@ -16,8 +22,9 @@ class UserSelect extends Component {
         selectedOption: null,
         options: [],
         errors: {},
-        startDate: moment(),
-        endDate: moment()
+        userSearchIds: [],
+        userSearchFilter: false,
+        userDateFilter: false
     }
 
     componentWillReceiveProps(nextProps) {
@@ -27,15 +34,22 @@ class UserSelect extends Component {
     }
     
     handleSelected = (selectedOption) => {
+        const { startDate, endDate } = this.props;
+
         this.setState({ selectedOption });
         let ids = [];
         selectedOption.map((option) => ids.push(option.value));
+        this.setState({
+            userSearchIds: ids
+        });
 
-        if(ids.length > 0){
-            this.props.findUsersById(ids.join());
-        } else {
-            this.props.getUsers();
-        }
+        this.props.updateUserIds(ids);
+
+        this.props.getUsers(this.props.totalUsers, {
+            userIds: ids.join(','),
+            startDate: startDate ? startDate.format('YYYY-MM-DD') : false,
+            endDate: endDate ? endDate.format('YYYY-MM-DD') : false
+        });
     }
 
     searchUsers = (searchString) => {
@@ -50,14 +64,14 @@ class UserSelect extends Component {
     }
 
     filterUsersByDateRange = (e, picker) => {
-        this.setState({ 
-            startDate: picker.startDate,
-            endDate: picker.endDate 
-        })
-        this.props.findUsersByDateRange(
-            picker.startDate.format('YYYY-MM-DD'), 
-            picker.endDate.format('YYYY-MM-DD')
-        );
+
+        this.props.updateDateRanges(picker.startDate, picker.endDate);
+
+        this.props.getUsers(this.props.totalUsers, {
+            userIds: this.state.userSearchIds.join(','),
+            startDate: picker.startDate.format('YYYY-MM-DD'),
+            endDate: picker.endDate.format('YYYY-MM-DD')
+        });
     }
 
 
@@ -71,41 +85,117 @@ class UserSelect extends Component {
     }
 
     removeDateRange = () => {
-        this.props.getUsers();
+        const { startDate, endDate } = this.props;
+
+        this.props.getUsers(this.props.totalUsers, {
+            userIds: this.state.userSearchIds.join(','),
+            startDate: startDate ? startDate.format('YYYY-MM-DD') : false,
+            endDate: endDate ? endDate.format('YYYY-MM-DD') : false
+        });
+    }
+
+    toggleUserSearch = (e) => {
+        e.preventDefault();
+        if(this.state.userSearchFilter){
+            this.setState({ userSearchFilter: false });
+            this.props.userFilterToggle(false);
+            this.props.updateUserIds([]);
+        } else {
+            this.setState({ userSearchFilter: true });
+            this.props.userFilterToggle(true);
+        }
+    }
+
+    toggleDateSearch = (e) => {
+        e.preventDefault();
+        if(this.state.userDateFilter){
+            this.setState({ userDateFilter: false });
+            this.props.userFilterToggle(false);
+            this.props.updateDateRanges(false, false);
+        } else {
+            this.setState({ userDateFilter: true });
+            this.props.userFilterToggle(true);
+        }
+
     }
 
     render() {
         const { errors } = this.state;
+        const { startDate, endDate } = this.props;
+
+        let dateRanges = startDate ? (startDate.format('YYYY-MM-DD') + ' to ' + endDate.format('YYYY-MM-DD')) : 'Select Date Range';
+
+        let userSearchOption = '';
+        let userSearchCancel = '';
+        let userDateOption = '';
+        let userDateCancel = '';
+        let userFilterTick = '';
+        if(this.state.userSearchFilter) {
+            userSearchOption = <Select
+                isMulti='true'
+                value={this.state.selectedOption}
+                onChange={this.handleSelected}
+                onInputChange={this.searchUsers}
+                onFocus={this.getInitialOptions}
+                options={this.state.options}
+            />;
+            userSearchCancel = <button className='btn btn-danger' onClick={this.toggleUserSearch}>X</button>;
+            userFilterTick = 'active';
+        }
+        if(this.state.userDateFilter) {
+            userDateOption = <DateRangePicker 
+                    startDate={startDate ? startDate : moment()} 
+                    endDate={endDate ? endDate : moment()}
+                    onApply={this.filterUsersByDateRange}
+                    onCancel={this.removeDateRange}
+                >
+                    <button className="btn btn-info">
+                        {dateRanges}
+                    </button>
+                </DateRangePicker>;
+                userDateCancel = <button className='btn btn-danger' onClick={this.toggleDateSearch}>X</button>;
+                userFilterTick = 'active';
+        }
 
         return (
             <div>
                 <div className="row mb-4">
-                    <div className="col-md-6">
-                        <Select
-                            isMulti='true'
-                            value={this.state.selectedOption}
-                            onChange={this.handleSelected}
-                            onInputChange={this.searchUsers}
-                            onFocus={this.getInitialOptions}
-                            options={this.state.options}
-                        />
+                    <div className="col-md-5">
+                        {userSearchOption}
                     </div>
-                    <div className="col-md-6">
-                        <DateRangePicker 
-                            startDate={this.state.startDate} 
-                            endDate={this.state.endDate}
-                            onApply={this.filterUsersByDateRange}
-                            onCancel={this.removeDateRange}
-                        >
-                            <button className="btn btn-info">
-                                {this.state.startDate.format('YYYY-MM-DD')} to {this.state.endDate.format('YYYY-MM-DD')}
+                    <div className="col-md-1">
+                        {userSearchCancel}
+                    </div>
+                    <div className="col-md-3">
+                        <div className="float-right">
+                            {userDateOption}
+                        </div>
+                    </div>
+                    <div className="col-md-1">
+                        {userDateCancel}
+                    </div>
+                    <div className="col-md-2 text-right">
+                        <div className="dropdown">
+                            <button 
+                                className="btn btn-secondary dropdown-toggle" 
+                                type="button" id="dropdownMenuButton" 
+                                data-toggle="dropdown" 
+                                aria-haspopup="true" 
+                                aria-expanded="false"
+                            >
+                                Filter
                             </button>
-                        </DateRangePicker>
+                            {this.state.userDateFilter}
+                            <div className="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <button className="dropdown-item" onClick={this.toggleUserSearch}>User Search</button>
+                                <button className="dropdown-item" onClick={this.toggleDateSearch}>Date Range</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                {errors.users && (
+                {errors.noprofile && (
                     <div className="alert alert-warning alert-dismissible">
-                        {errors.users}
+                        {errors.noprofile}
                         <button type="button" className="close" data-dismiss="alert" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -118,16 +208,22 @@ class UserSelect extends Component {
 
 UserSelect.propTypes = {
     users: PropTypes.array.isRequired,
-    findUsersById: PropTypes.func.isRequired,
     getUsers: PropTypes.func.isRequired,
-    findUsersByDateRange: PropTypes.func.isRequired,
-    errors: PropTypes.object.isRequired
+    errors: PropTypes.object.isRequired,
+    totalUsers: PropTypes.number.isRequired,
+    updateDateRanges: PropTypes.func.isRequired,
+    userFilterToggle: PropTypes.func.isRequired,
+    updateUserIds: PropTypes.func.isRequired
 }
 
 const mapStateToProps = (state) => ({
     users: state.user.users,
     userSearch: state.user.userSearch,
-    errors: state.errors
+    startDate: state.user.startDate,
+    endDate: state.user.endDate,
+    errors: state.errors,
+    userFilter: state.user.userFilter,
+    userIds: state.user.userIds
 })
 
-export default connect(mapStateToProps, { findUsersById, getUsers, findUsersByDateRange })(UserSelect);
+export default connect(mapStateToProps, { getUsers, updateDateRanges, userFilterToggle, updateUserIds })(UserSelect);

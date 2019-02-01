@@ -4,12 +4,17 @@ import { connect } from 'react-redux';
 import UserItem from './UserItem';
 import UserSelect from './filter/UserSelect';
 import { getUsers } from '../../actions/userActions';
+import moment from 'moment';
 
-const GAP = 150;
 let totalUsers = 6;
 let maxUsers = 6;
 
 class UserList extends Component {
+
+    state = {
+        startDate: moment(),
+        endDate: moment()
+    }
 
     constructor(props) {
         super(props);
@@ -33,27 +38,33 @@ class UserList extends Component {
         const { rootRef } = this;
         const { innerHeight, scrollY } = window;
         const { offsetTop, scrollHeight } = rootRef;
+        const { startDate, endDate, userIds } = this.props;
+
+        console.log(innerHeight + scrollY, (offsetTop + scrollHeight))
+
         if (
-            innerHeight + scrollY > (offsetTop + scrollHeight) - GAP
+            innerHeight + scrollY > (offsetTop + scrollHeight)
         ) {
             if( this.props.users && totalUsers <= this.props.users.length) {
                 totalUsers = totalUsers + maxUsers;
             }
-            if(!this.props.userSearch){
-                this.props.getUsers(totalUsers);
-            }
+            this.props.getUsers(totalUsers, {userIds: userIds.join(','), startDate: startDate, endDate: endDate});
         }
     }
 
     render() {
         const { users } = this.props;
         const { setRootRef } = this;
+
         if(users && users.length > 0){
             const userItem = (
                 <div className="profiles" ref={setRootRef}>
                     <div className="row">
                         <div className="col-md-12">
-                            <UserSelect users={users} />
+                            <UserSelect 
+                                users={users}
+                                totalUsers={totalUsers}
+                            />
                         </div>
                     </div>
                     <div className="row">
@@ -82,7 +93,10 @@ UserList.propTypes = {
 
 const mapStateToProps = state => ({
     users: state.user.users,
-    userSearch: state.user.userSearch
+    userSearch: state.user.userSearch,
+    startDate: state.user.startDate,
+    endDate: state.user.endDate,
+    userIds: state.user.userIds
 });
 
 export default connect(

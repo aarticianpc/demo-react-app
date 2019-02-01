@@ -1,11 +1,13 @@
-import { GET_USERS, FIND_USERS_BY_ID, FIND_USERS_BY_DATE_RANGE } from '../actions/types';
-import isEmpty from '../validation/isEmpty';
+import { GET_USERS, UPDATE_DATE_RANGES, USER_FILTER, UPDATE_USER_IDS } from '../actions/types';
 
 const initialState = {
     users: [],
     user: {},
     loading: false,
-    userSearch: false
+    startDate: false,
+    endDate: false,
+    userFilter: false,
+    userIds: []
 }
 
 export default function(state = initialState, action) {
@@ -16,12 +18,21 @@ export default function(state = initialState, action) {
                 users: action.payload,
                 userSearch: false
             }
-        case FIND_USERS_BY_ID:
-        case FIND_USERS_BY_DATE_RANGE:
+        case USER_FILTER:
             return {
                 ...state,
-                users: action.payload,
-                userSearch: !isEmpty(action.payload)
+                userFilter: action.payload.userFilter
+            }
+        case UPDATE_DATE_RANGES:
+            return {
+                ...state,
+                startDate: action.payload.startDate,
+                endDate: action.payload.endDate
+            }
+        case UPDATE_USER_IDS:
+            return {
+                ...state,
+                userIds: action.payload.userIds
             }
         default:
             return state;

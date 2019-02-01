@@ -1,26 +1,41 @@
 import axios from 'axios';
 
-import { GET_USERS, SEARCH_USERS_BY_NAME, FIND_USERS_BY_ID, FIND_USERS_BY_DATE_RANGE, GET_ERRORS } from './types';
+import { 
+    GET_USERS, 
+    SEARCH_USERS_BY_NAME, 
+    GET_ERRORS, 
+    UPDATE_DATE_RANGES,
+    USER_FILTER,
+    UPDATE_USER_IDS
+ } from './types';
 
 // Default totalUsers
 let defaultTotalUsers = 6;
 
 // GET Users
-export const getUsers = (totalUsers) => dispatch => {
+export const getUsers = (totalUsers, userParams) => dispatch => {
+    
+    // Total users to get
     if(!totalUsers){
         totalUsers = defaultTotalUsers;
     }
+
+    // User filter data
+    let userFilter = {}
+    if(userParams){
+        userFilter = userParams
+    }
     axios
-        .get(`/api/user/all/${totalUsers}`)
+        .post(`/api/user/all/${totalUsers}`, userFilter)
         .then(res => {
             dispatch({
                 type: GET_USERS,
                 payload: res.data
-            })
+            });
         })
         .catch(err => dispatch({
-            type: GET_USERS,
-            payload: []
+            type: GET_ERRORS,
+            payload: err.response.data
         }))
 }
 
@@ -43,34 +58,35 @@ export const searchUserByName = (string) => {
             }});
 }
 
-// Update Users list
-export const findUsersById = (ids) => dispatch => {
-    axios
-        .post('/api/user/filter_by_ids', { ids: ids })
-        .then(res => {
-            dispatch({
-                type: FIND_USERS_BY_ID,
-                payload: res.data
-            });
-        })
-        .catch(err => dispatch({
-            type: FIND_USERS_BY_ID,
-            payload: []
-        }))
+// Update date ranges
+export const updateDateRanges = (startDate, endDate) => dispatch => {
+    dispatch({
+        type: UPDATE_DATE_RANGES,
+        payload: {
+            startDate: startDate,
+            endDate: endDate,
+            userFilter: true
+        }
+    });
 }
 
-// Update Users list
-export const findUsersByDateRange = (startDate, endDate) => dispatch => {
-    axios
-        .post('/api/user/filter_by_date_range', { startDate, endDate })
-        .then(res => {
-            dispatch({
-                type: FIND_USERS_BY_DATE_RANGE,
-                payload: res.data
-            });
-        })
-        .catch(err => dispatch({
-            type: GET_ERRORS,
-            payload: err.response.data
-          }))
+
+// User userIds toggle
+export const updateUserIds = (userIds) => dispatch => {
+    dispatch({
+        type: UPDATE_USER_IDS,
+        payload: {
+            userIds: userIds
+        }
+    });
+}
+
+// User filter toggle
+export const userFilterToggle = (userFilter) => dispatch => {
+    dispatch({
+        type: USER_FILTER,
+        payload: {
+            userFilter: userFilter
+        }
+    });
 }
