@@ -69,10 +69,12 @@ class UserSelect extends Component {
 
     filterUsersByDateRange = (e, picker) => {
 
+        const { userIds } = this.props;
+
         this.props.updateDateRanges(picker.startDate, picker.endDate);
 
         this.props.getUsers(this.props.totalUsers, {
-            userIds: this.state.userSearchIds.join(','),
+            userIds: userIds.join(','),
             startDate: picker.startDate.format('YYYY-MM-DD'),
             endDate: picker.endDate.format('YYYY-MM-DD')
         });
