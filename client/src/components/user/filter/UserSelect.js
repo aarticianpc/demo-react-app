@@ -7,7 +7,8 @@ import {
     getUsers, 
     updateDateRanges, 
     userFilterToggle, 
-    updateUserIds 
+    updateUserIds,
+    getUsersOptions
 } from '../../../actions/userActions';
 import DateRangePicker from 'react-bootstrap-daterangepicker';
 import 'bootstrap-daterangepicker/daterangepicker.css';
@@ -15,6 +16,7 @@ import moment from 'moment';
 
 // Set default select options
 let options = [];
+let totalOptionUsers = 10;
 
 class UserSelect extends Component {
 
@@ -25,6 +27,11 @@ class UserSelect extends Component {
         userSearchIds: [],
         userSearchFilter: false,
         userDateFilter: false
+    }
+
+    componentDidMount() {
+        this.props.getUsersOptions(totalOptionUsers);
+        totalOptionUsers = totalOptionUsers + 10;
     }
 
     componentWillReceiveProps(nextProps) {
@@ -39,9 +46,6 @@ class UserSelect extends Component {
         this.setState({ selectedOption });
         let ids = [];
         selectedOption.map((option) => ids.push(option.value));
-        this.setState({
-            userSearchIds: ids
-        });
 
         this.props.updateUserIds(ids);
 
@@ -100,6 +104,7 @@ class UserSelect extends Component {
             this.setState({ userSearchFilter: false });
             this.props.userFilterToggle(false);
             this.props.updateUserIds([]);
+            this.removeDateRange();
         } else {
             this.setState({ userSearchFilter: true });
             this.props.userFilterToggle(true);
@@ -119,6 +124,20 @@ class UserSelect extends Component {
 
     }
 
+    handleOptionsScroll = (e) => {
+        this.props.getUsersOptions(totalOptionUsers);
+        totalOptionUsers = totalOptionUsers + 10;
+
+        const { userOptions } = this.props;
+        console.log(userOptions);
+        this.setState({ options: [] });
+        options = [];
+        userOptions.map((user) => options.push({ value: user._id, label: user.name }));
+        this.setState({ options: options });
+
+        console.log('scroll to bottom on options');
+    }
+
     render() {
         const { errors } = this.state;
         const { startDate, endDate } = this.props;
@@ -129,18 +148,18 @@ class UserSelect extends Component {
         let userSearchCancel = '';
         let userDateOption = '';
         let userDateCancel = '';
-        let userFilterTick = '';
+
         if(this.state.userSearchFilter) {
             userSearchOption = <Select
                 isMulti='true'
                 value={this.state.selectedOption}
                 onChange={this.handleSelected}
                 onInputChange={this.searchUsers}
-                onFocus={this.getInitialOptions}
+                onFocus={this.handleOptionsScroll}
                 options={this.state.options}
+                onMenuScrollToBottom={this.handleOptionsScroll}
             />;
             userSearchCancel = <button className='btn btn-danger' onClick={this.toggleUserSearch}>X</button>;
-            userFilterTick = 'active';
         }
         if(this.state.userDateFilter) {
             userDateOption = <DateRangePicker 
@@ -154,7 +173,6 @@ class UserSelect extends Component {
                     </button>
                 </DateRangePicker>;
                 userDateCancel = <button className='btn btn-danger' onClick={this.toggleDateSearch}>X</button>;
-                userFilterTick = 'active';
         }
 
         return (
@@ -213,7 +231,8 @@ UserSelect.propTypes = {
     totalUsers: PropTypes.number.isRequired,
     updateDateRanges: PropTypes.func.isRequired,
     userFilterToggle: PropTypes.func.isRequired,
-    updateUserIds: PropTypes.func.isRequired
+    updateUserIds: PropTypes.func.isRequired,
+    getUsersOptions: PropTypes.func.isRequired
 }
 
 const mapStateToProps = (state) => ({
@@ -223,7 +242,14 @@ const mapStateToProps = (state) => ({
     endDate: state.user.endDate,
     errors: state.errors,
     userFilter: state.user.userFilter,
-    userIds: state.user.userIds
+    userIds: state.user.userIds,
+    userOptions: state.user.userOptions
 })
 
-export default connect(mapStateToProps, { getUsers, updateDateRanges, userFilterToggle, updateUserIds })(UserSelect);
+export default connect(mapStateToProps, { 
+    getUsers, 
+    updateDateRanges, 
+    userFilterToggle, 
+    updateUserIds,
+    getUsersOptions
+})(UserSelect);

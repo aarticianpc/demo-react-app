@@ -6,8 +6,8 @@ import UserSelect from './filter/UserSelect';
 import { getUsers } from '../../actions/userActions';
 import moment from 'moment';
 
-let totalUsers = 6;
-let maxUsers = 6;
+let totalUsers = 10;
+let maxUsers = 10;
 
 class UserList extends Component {
 
@@ -35,15 +35,11 @@ class UserList extends Component {
 
     // Load more users
     handleScroll = (e) => {
-        const { rootRef } = this;
-        const { innerHeight, scrollY } = window;
-        const { offsetTop, scrollHeight } = rootRef;
+        let windowRelativeBottom = document.documentElement.getBoundingClientRect().bottom;
         const { startDate, endDate, userIds } = this.props;
 
-        console.log(innerHeight + scrollY, (offsetTop + scrollHeight))
-
         if (
-            innerHeight + scrollY > (offsetTop + scrollHeight)
+            windowRelativeBottom === document.documentElement.clientHeight
         ) {
             if( this.props.users && totalUsers <= this.props.users.length) {
                 totalUsers = totalUsers + maxUsers;

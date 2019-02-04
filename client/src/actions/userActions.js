@@ -6,11 +6,12 @@ import {
     GET_ERRORS, 
     UPDATE_DATE_RANGES,
     USER_FILTER,
-    UPDATE_USER_IDS
+    UPDATE_USER_IDS,
+    GET_USERS_OPTIONS
  } from './types';
 
 // Default totalUsers
-let defaultTotalUsers = 6;
+let defaultTotalUsers = 10;
 
 // GET Users
 export const getUsers = (totalUsers, userParams) => dispatch => {
@@ -89,4 +90,26 @@ export const userFilterToggle = (userFilter) => dispatch => {
             userFilter: userFilter
         }
     });
+}
+
+// GET Users for options
+export const getUsersOptions = (totalUsers) => dispatch => {
+    
+    // Total users to get
+    if(!totalUsers){
+        totalUsers = defaultTotalUsers;
+    }
+
+    axios
+        .post(`/api/user/all/${totalUsers}`, {})
+        .then(res => {
+            dispatch({
+                type: GET_USERS_OPTIONS,
+                payload: res.data
+            });
+        })
+        .catch(err => dispatch({
+            type: GET_USERS_OPTIONS,
+            payload: []
+        }))
 }

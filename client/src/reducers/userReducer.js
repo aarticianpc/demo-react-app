@@ -1,4 +1,4 @@
-import { GET_USERS, UPDATE_DATE_RANGES, USER_FILTER, UPDATE_USER_IDS } from '../actions/types';
+import { GET_USERS, UPDATE_DATE_RANGES, USER_FILTER, UPDATE_USER_IDS, GET_USERS_OPTIONS } from '../actions/types';
 
 const initialState = {
     users: [],
@@ -7,7 +7,8 @@ const initialState = {
     startDate: false,
     endDate: false,
     userFilter: false,
-    userIds: []
+    userIds: [],
+    userOptions: []
 }
 
 export default function(state = initialState, action) {
@@ -33,6 +34,11 @@ export default function(state = initialState, action) {
             return {
                 ...state,
                 userIds: action.payload.userIds
+            }
+        case GET_USERS_OPTIONS:
+            return {
+                ...state,
+                userOptions: action.payload
             }
         default:
             return state;
