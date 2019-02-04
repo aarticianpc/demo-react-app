@@ -105,6 +105,7 @@ class UserSelect extends Component {
             this.props.userFilterToggle(false);
             this.props.updateUserIds([]);
             this.removeDateRange();
+            this.setState({selectedOption: null});
         } else {
             this.setState({ userSearchFilter: true });
             this.props.userFilterToggle(true);
