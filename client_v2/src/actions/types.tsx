@@ -1,0 +1,8 @@
+export const GET_ERRORS = "GET_ERRORS";
+export const SET_CURRENT_USER = "SET_CURRENT_USER";
+export const GET_USERS = "GET_USERS";
+export const SEARCH_USERS_BY_NAME = "SEARCH_USERS_BY_NAME";
+export const UPDATE_DATE_RANGES = "UPDATE_DATE_RANGES";
+export const USER_FILTER = "USER_FILTER";
+export const UPDATE_USER_IDS = "UPDATE_USER_IDS";
+export const GET_USERS_OPTIONS = "GET_USERS_OPTIONS";

@@ -35,9 +35,9 @@ app.use('/api/user', users);
 
 if(process.env.NODE_ENV === 'production') {
   // Set static folder
-  app.use(express.static('client/build'));
+  app.use(express.static('client_v2/build'));
   app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
+    res.sendFile(path.resolve(__dirname, 'client_v2', 'build', 'index.html'));
   });
 
 }
